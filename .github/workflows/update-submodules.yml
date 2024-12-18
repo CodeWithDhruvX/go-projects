@@ -1,0 +1,33 @@
+name: Update Submodules
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on PR to the main branch
+
+jobs:
+  update-submodules:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout parent repository
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'  # Check out submodules as well
+
+    - name: Update all submodules to the latest commits
+      run: |
+        git submodule update --remote --merge  # Update all submodules
+
+    - name: Commit changes for updated submodules
+      run: |
+        git add .  # Stage the submodule changes
+        git commit -m "Update submodules to the latest commits" || echo "No changes to commit"
+        git push origin main  # Push the changes back to the parent repository
+
+    - name: Clean up the workspace
+      run: |
+        git submodule foreach 'git reset --hard'  # Clean up any remaining changes from the submodule
