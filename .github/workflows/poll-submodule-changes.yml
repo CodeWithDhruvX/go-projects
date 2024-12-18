@@ -1,0 +1,25 @@
+name: Poll for Submodule Changes
+
+on:
+  schedule:
+    - cron: '* * * * *'  # Runs every minute
+
+jobs:
+  poll-submodules:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout parent repository
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Fetch the latest changes for submodules
+      run: |
+        git submodule update --remote
+        git submodule foreach 'git fetch origin'
+    
+    - name: Check for changes and update submodule references
+      run: |
+        git submodule status
+        git diff --exit-code || (git add . && git commit -m "Update submodules to latest commits" && git push origin main)
